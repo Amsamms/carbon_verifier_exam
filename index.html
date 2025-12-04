@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon & ISO Standards Professional Exam</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        arabic: ['Noto Kufi Arabic', 'sans-serif'],
+                    },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.1)',
+                            200: 'rgba(255, 255, 255, 0.2)',
+                            800: 'rgba(255, 255, 255, 0.8)',
+                            900: 'rgba(255, 255, 255, 0.95)',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        body {
+            background: fixed linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // ==========================================
+        // 1. THE FULL QUESTION DATABASE
+        // ==========================================
+        const QUESTIONS = [
+            // Climate Change (Arabic)
+            { id: 1, section: 'Climate Change (التغيرات المناخية)', text: 'ما هو السبب الرئيسي لارتفاع درجة حرارة الأرض؟', options: ['زيادة عدد البراكين', 'زيادة انبعاثات غازات الدفيئة', 'نقص كمية المياه العذبة', 'زيادة عدد الغابات'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 2, section: 'Climate Change (التغيرات المناخية)', text: 'أي من التالي ليس من آثار التغيرات المناخية؟', options: ['ارتفاع مستوى سطح البحر', 'زيادة الأمطار الغزيرة', 'زيادة عدد الأيام المشمسة', 'زيادة تكرار الظواهر الجوية المتطرفة'], correctAnswerIndex: 2, type: 'MCQ', language: 'ar' },
+            { id: 3, section: 'Climate Change (التغيرات المناخية)', text: 'ما هو بروتوكول كيوتو؟', options: ['اتفاقية دولية تهدف إلى حماية طبقة الأوزون', 'اتفاقية دولية تهدف إلى خفض انبعاثات غازات الدفيئة', 'منظمة دولية تهتم بدراسة التنوع البيولوجي', 'منظمة دولية تهتم بتطوير مصادر الطاقة المتجددة'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 4, section: 'Climate Change (التغيرات المناخية)', text: 'أي من الحلول التالية يمكن أن يساهم في الحد من التغيرات المناخية؟', options: ['زيادة استخدام الوقود الأحفوري', 'زيادة قطع الأشجار', 'تطوير مصادر الطاقة المتجددة', 'زيادة الاعتماد على النقل الفردي بالسيارات'], correctAnswerIndex: 2, type: 'MCQ', language: 'ar' },
+            { id: 5, section: 'Climate Change (التغيرات المناخية)', text: 'أي من الآتي يعتبر عامل تكثيف (amplifier) للتغيرات المناخية، حيث يزيد من تأثير الاحترار العالمي؟', options: ['انخفاض مستوى الميثان في الغلاف الجوي', 'زيادة امتصاص المحيطات لحرارة الأرض', 'ذوبان الجليد البحري، مما يقلل من انعكاس أشعة الشمس', 'زيادة الغطاء النباتي في المناطق المعتدلة'], correctAnswerIndex: 2, type: 'MCQ', language: 'ar' },
+            { id: 6, section: 'Climate Change (التغيرات المناخية)', text: 'ما هو دور السحب العالية الرقيقة (cirrus clouds) في التغيرات المناخية؟', options: ['تزيد من انعكاس أشعة الشمس', 'تعمل كبطانية تحبس الحرارة بالقرب من سطح الأرض', 'تساعد على تكوين الأمطار', 'لا تؤثر بشكل كبير'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 7, section: 'Climate Change (التغيرات المناخية)', text: 'ما هو تأثير التغيرات المناخية على النظم الإيكولوجية؟', options: ['تدهور النظم الإيكولوجية', 'تحسين النظم الإيكولوجية', 'لا تأثير', 'غير معروف'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 8, section: 'Climate Change (التغيرات المناخية)', text: 'كيف يتم تحسين تصميم المباني لتقليل الانبعاثات؟', options: ['من خلال استخدام مواد بناء متجددة', 'من خلال تحسين التهوية', 'من خلال تصميم المباني الشمسية', 'جميعًا'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 9, section: 'Climate Change (التغيرات المناخية)', text: 'أي اتفاقية دولية تهدف إلى الحد من ظاهرة الاحتباس الحراري؟', options: ['اتفاقية باريس', 'بروتوكول كيوتو', 'بروتوكول مونتريال', 'إعلان ريو'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 10, section: 'Climate Change (التغيرات المناخية)', text: 'ما هو تأثير التغيرات المناخية على الموارد الغذائية؟', options: ['زيادة الإنتاج الغذائي', 'نقص الإنتاج الغذائي', 'لا تأثير', 'غير معروف'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            
+            // ISO 14001 (Arabic)
+            { id: 101, section: 'ISO 14001:2015', text: 'ماذا يعني PDCA؟', options: ['خطط، افعل، تحقق، تصرف', 'التخطيط، التنفيذ، التأكيد، التعديل', 'التحضير، التنفيذ، التحقق، التصرف', 'التحضير، التنفيذ، التأكيد، العمل'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 102, section: 'ISO 14001:2015', text: 'ما هي الوثيقة التي تقدم إرشادات بشأن أنظمة إدارة التدقيق والمراجعة؟', options: ['ايزو 9000', 'ايزو 9001', 'ايزو 9002', 'ايزو 19011'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 103, section: 'ISO 14001:2015', text: 'يتم تضمين تنفيذ أنظمة الإدارة البيئية في أي معيار؟', options: ['ايزو 14001', 'ايزو 14002', 'ايزو 14004', 'ايزو 14006'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 104, section: 'ISO 14001:2015', text: 'النتيجة المقصودة من نظام الإدارة البيئية هي:', options: ['تعزيز الأداء البيئي', 'الوفاء بالتزامات الامتثال', 'تحقيق الأهداف البيئية', 'كل ما سبق'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 105, section: 'ISO 14001:2015', text: 'يمثل نظام الإدارة مجموعة من العمليات والممارسات التي تمكن منظمة من تقليل تأثيرها البيئي. ما هو هذا النظام؟', options: ['نظم إدارة البيئة', 'الفوائد الاقتصادية', 'شروط خاصة', 'تأثير أصحاب المصلحة'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 106, section: 'ISO 14001:2015', text: 'وفقًا للبند 9.2.1، متى يجب إجراء التدقيق الداخلي؟', options: ['أسبوعي', 'شهريا', 'سنويا', 'على فترات مخططة'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 107, section: 'ISO 14001:2015', text: 'كيف يحدد 14001 ISO "الهدف البيئي"؟', options: ['هدف بيئي حددته الشركة', 'المتطلبات القانونية', 'الهدف الذي حددته المنظمة بما يتفق مع سياستها البيئية', 'لا شيء مما سبق'], correctAnswerIndex: 2, type: 'MCQ', language: 'ar' },
+            { id: 108, section: 'ISO 14001:2015', text: 'نظام إدارة البيئة يركز فقط على الأنشطة ذات التأثير الإيجابي على صحة السكان.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 109, section: 'ISO 14001:2015', text: 'إن تخفيف العبء على الهواء والماء... يسمى أدوات التخفيض.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 110, section: 'ISO 14001:2015', text: 'إن عملية تنفيذ نظام الادارة البيئية يجب أن تكون طوعية بالكامل (بمعنى عدم وجود التزام).', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 111, section: 'ISO 14001:2015', text: 'يمكن للعملاء في مختلف أنحاء العالم التأكد من السلوك البيئي بناءً على المعايير المطبقة والملصقات البيئية.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 112, section: 'ISO 14001:2015', text: 'إن إدارة البيئة هي عملية دعم للقسم بأكمله، سواء في مجالات الإنتاج أو الإدارة.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 113, section: 'ISO 14001:2015', text: 'إن إعلام العملاء وأصحاب المصلحة الآخرين بنهجها الصديق للبيئة يتم من خلال السياسة البيئية.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 114, section: 'ISO 14001:2015', text: 'من الفوائد الاقتصادية لنظم إدارة البيئة انه يعطى المزايا في العطاءات والمناقصات.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+
+            // ISO 14064-1 (Arabic)
+            { id: 201, section: 'ISO 14064-1', text: 'ما هو الغرض الأساسي من المواصفة الدولية ISO 14064-1؟', options: ['تقييم جودة المنتجات', 'تقييم انبعاثات الغازات الدفيئة', 'تقييم كفاءة استخدام الطاقة', 'تقييم الأداء المالي'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 202, section: 'ISO 14064-1', text: 'أي من التالي يعتبر عنصرًا أساسيًا في نظام إدارة انبعاثات غازات الدفيئة وفقًا للمواصفة؟', options: ['تحديد الأهداف المالية', 'تحديد حدود النظام', 'تحسين جودة المنتج', 'زيادة الإنتاج'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 203, section: 'ISO 14064-1', text: 'ما هي الاستراتيجية الرئيسية لتقليل انبعاثات غازات الاحتباس الحراري؟', options: ['تحسين كفاءة الطاقة', 'استخدام الطاقة المتجددة', 'تقليل استهلاك المواد', 'جميعًا'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 204, section: 'ISO 14064-1', text: 'ما هي أهمية التحقق من البيانات في عملية تقييم الانبعاثات؟', options: ['ضمان دقة النتائج', 'تقليل التكاليف', 'زيادة الإنتاجية', 'تحسين صورة الشركة'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 205, section: 'ISO 14064-1', text: 'ما هي المراحل الرئيسية في دورة حياة المنتج التي يجب أخذها في الاعتبار عند تقييم الانبعاثات؟', options: ['الإنتاج والتوزيع فقط', 'الاستخراج، الإنتاج، التوزيع، الاستخدام، والتخلص', 'الإنتاج والاستخدام فقط', 'التوزيع والاستخدام فقط'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 206, section: 'ISO 14064-1', text: 'ما هي أهمية تحديد حدود النظام في عملية تقييم الانبعاثات؟', options: ['تحديد المسؤوليات', 'ضمان دقة النتائج', 'تقليل التكاليف', 'كل ما سبق'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 207, section: 'ISO 14064-1', text: 'ما هي الاستراتيجية الرئيسية لتقليل انبعاثات غازات الدفيئة للمنظمات؟', options: ['تحسين كفاءة الطاقة', 'استخدام الطاقة المتجددة', 'تقليل استهلاك المواد', 'زيادة الإنتاجية'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 208, section: 'ISO 14064-1', text: 'أي من الغازات الدفيئة التالية له أقوى تأثير على الاحترار العالمي على المدى القصير؟', options: ['ثاني أكسيد الكربون (CO2)', 'الميثان (CH4)', 'أكسيد النيتروز (N2O)', 'الفريونات (CFCs)'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 209, section: 'ISO 14064-1', text: 'ما الذي يمكن أن يخبرنا به مؤشر "مساحة الغابات"؟', options: ['كمية المياه العذبة', 'مدى نظافة الهواء', 'التنوع البيولوجي', 'جميع الخيارات السابقة'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 210, section: 'ISO 14064-1', text: 'هل مواصفة ISO 14064-1 تتعلق بتحديد انبعاثات غازات الاحتباس الحراري؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 211, section: 'ISO 14064-1', text: 'هل مواصفة ISO 14064-1 تهدف إلى تحسين كفاءة الطاقة فقط؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 212, section: 'ISO 14064-1', text: 'هل مواصفة ISO 14064-1 تشمل تقنيات حساب الانبعاثات؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 213, section: 'ISO 14064-1', text: 'هل مواصفة ISO 14064-1 تتعلق بالتأثيرات البيئية عامة؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 214, section: 'ISO 14064-1', text: 'هل يجب تحديد مصادر الانبعاثات حسب مواصفة ISO 14064-1؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 215, section: 'ISO 14064-1', text: 'هل يجب استخدام نماذج رياضية لتحليل الانبعاثات (إلزاميًا)؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 216, section: 'ISO 14064-1', text: 'هل يجب تحليل البيانات لتحديد الانبعاثات؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 217, section: 'ISO 14064-1', text: 'هل يجب تقديم تقرير عن الانبعاثات؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 218, section: 'ISO 14064-1', text: 'هل يجب أن يتوافق التقرير مع متطلبات ISO 14064-1؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 219, section: 'ISO 14064-1', text: 'هل يجب تضمين بيانات الانبعاثات في التقرير؟', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+
+            // ISO 14069 (Arabic)
+            { id: 301, section: 'ISO 14069', text: 'ما هي العوامل التي يجب مراعاتها عند اختيار عوامل الانبعاث؟', options: ['نوع الوقود المستخدم', 'تقنية الاحتراق', 'كفاءة الطاقة', 'كل ما سبق'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 302, section: 'ISO 14069', text: 'ما هي أهمية التحسين المستمر في نظام إدارة انبعاثات غازات الدفيئة؟', options: ['ضمان الامتثال للوائح', 'تقليل التكاليف', 'تحسين الأداء البيئي', 'كل ما سبق'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 303, section: 'ISO 14069', text: 'ما هو المصدر الرئيسي لانبعاثات ثاني أكسيد الكربون (CO2)؟', options: ['استهلاك الوقود الأحفوري في وسائل النقل', 'إنتاج الطاقة الكهربائية من الوقود الأحفوري', 'إنتاج الصلب', 'إنتاج الأغذية'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 304, section: 'ISO 14069', text: 'أي من الأنشطة البشرية التالية يساهم بشكل كبير في زيادة انبعاثات غازات الدفيئة؟', options: ['الزراعة العضوية', 'حرق الوقود الأحفوري', 'إعادة تدوير النفايات', 'زراعة الأشجار'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 305, section: 'ISO 14069', text: 'ما هي الفئة الرئيسية لانبعاثات غازات الدفيئة للمنظمات؟', options: ['الانبعاثات المباشرة (Scope 1)', 'الانبعاثات غير المباشرة (Scope 2)', 'الانبعاثات غير المباشرة الأخرى (Scope 3)', 'الانبعاثات العرضية'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 306, section: 'ISO 14069', text: 'ما هو الهدف الرئيسي لبروتوكول غازات الدفيئة (GHG Protocol)؟', options: ['تحديد انبعاثات غازات الدفيئة للمنظمات', 'تحديد تأثيرات تغير المناخ', 'تحديد التكاليف', 'فرص استثمارية'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 307, section: 'ISO 14069', text: 'ما هي الأداة الرئيسية لقياس انبعاثات غازات الدفيئة للمنظمات؟', options: ['نظام إدارة البيئة', 'نظام إدارة الطاقة', 'أداة حساب انبعاثات غازات الدفيئة (GHG Calculator)', 'برنامج إدارة الموارد'], correctAnswerIndex: 2, type: 'MCQ', language: 'ar' },
+            { id: 308, section: 'ISO 14069', text: 'ما هي المادة الرئيسية التي تؤثر على انبعاثات غازات الدفيئة في عمليات الإنتاج؟', options: ['الطاقة الكهربائية', 'الوقود الأحفوري', 'المواد الكيميائية', 'المياه'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 309, section: 'ISO 14069', text: 'ما هي اللوائح الرئيسية لتقليل انبعاثات غازات الاحتباس الحراري؟', options: ['تحديد أهداف انبعاثات', 'تطبيق لوائح بيئية', 'دعم تقنيات نظيفة', 'جميعًا'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+            { id: 310, section: 'ISO 14069', text: 'ما هو الهدف من تحليل دورة الحياة في مواصفة ISO/TR 14069؟', options: ['تحديد الانبعاثات الغازية', 'تقييم التأثيرات البيئية', 'تحسين كفاءة الطاقة', 'جميعًا'], correctAnswerIndex: 3, type: 'MCQ', language: 'ar' },
+
+            // ISO 14064-2 (Arabic)
+            { id: 401, section: 'ISO 14064-2', text: 'ما هو الهدف الرئيسي من تطبيق المواصفة ISO 14064-2؟', options: ['تقليل تكاليف الشركات', 'تحسين الأداء البيئي من خلال قياس وتقليل الانبعاثات الكربونية', 'زيادة الإنتاجية', 'تحسين جودة المنتجات'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 402, section: 'ISO 14064-2', text: 'أي من هذه الأنشطة يمكن أن يساهم في تقليل الانبعاثات في صناعة الأسمنت؟', options: ['استخدام الفحم', 'استخدام تقنيات احتجاز وتخزين الكربون (CCS)', 'زيادة استهلاك الطاقة', 'تقليل الكفاءة'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 403, section: 'ISO 14064-2', text: 'في الزراعة، كيف يمكن تطبيق المواصفة 14064 لتحقيق خفض الانبعاثات؟', options: ['تحسين كفاءة استخدام الأسمدة والمبيدات', 'زيادة استخدام الآلات الثقيلة', 'زراعة المحاصيل المعدلة', 'تقليل المساحات'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 404, section: 'ISO 14064-2', text: 'ما هو دور الطاقة المتجددة في تقليل الانبعاثات الكربونية في صناعة البترول؟', options: ['تقليل تكلفة الإنتاج', 'تقليل الاعتماد على الوقود الأحفوري', 'زيادة الانبعاثات', 'زيادة استهلاك الطاقة'], correctAnswerIndex: 1, type: 'MCQ', language: 'ar' },
+            { id: 405, section: 'ISO 14064-2', text: 'كيف يمكن لصناعة الحديد والصلب استخدام المواصفة 14064 لخفض انبعاثات غازات الدفيئة؟', options: ['تحسين كفاءة الفرن الكهربائي وتقليل استخدام الفحم', 'زيادة التلوث', 'استخدام أساليب تقليدية', 'زيادة استهلاك الطاقة'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 406, section: 'ISO 14064-2', text: 'ما هي الفائدة الرئيسية من إعداد تقرير المراجعة الخارجية في سياق المواصفة 14064؟', options: ['ضمان دقة البيانات وتقليل الانبعاثات', 'تحسين التسويق', 'تقليل التكاليف التشغيلية', 'تحسين الإنتاجية'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 407, section: 'ISO 14064-2', text: 'كيف يمكن لمزارع تستخدم تقنية الزراعة المستدامة أن تساهم في تحقيق أهداف المواصفة؟', options: ['من خلال تقليل الانبعاثات الناجمة عن استخدام الأسمدة العضوية', 'زيادة الأسمدة الكيميائية', 'حرق المخلفات', 'أساليب تقليدية'], correctAnswerIndex: 0, type: 'MCQ', language: 'ar' },
+            { id: 408, section: 'ISO 14064-2', text: 'يجب أن يشمل مشروع خفض انبعاثات الكربون توثيق وتحديد سنة الأساس.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 409, section: 'ISO 14064-2', text: 'يجب أن يشمل المشروع فقط الأنشطة التي تقلل الانبعاثات دون النظر إلى إزالة غازات الدفيئة.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 410, section: 'ISO 14064-2', text: 'تُعد مراجعة البيانات جزءًا أساسيًا من عملية إعداد تقرير الانبعاثات.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 411, section: 'ISO 14064-2', text: 'يجب على المشاريع الالتزام بمقاييس ISO 14064-2 فقط ولا يتطلب الأمر التشاور مع الجهات التنظيمية.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 412, section: 'ISO 14064-2', text: 'يطلب من المشاريع تقديم تقارير سنوية لقياس الانبعاثات فقط دون الحاجة إلى مراجع خارجية.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 1, type: 'TF', language: 'ar' },
+            { id: 413, section: 'ISO 14064-2', text: 'يمكن للمشروع تحديد عوامل إزالة الكربون بناءً على معايير علمية معترف بها.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+            { id: 414, section: 'ISO 14064-2', text: 'يتعين على المشاريع تحديد حدود النظام بشكل دقيق لتحديد مصادر الانبعاثات.', options: ['صحيح', 'خطأ'], correctAnswerIndex: 0, type: 'TF', language: 'ar' },
+
+            // ISO 50001 (English)
+            { id: 501, section: 'ISO 50001', text: 'What does energy management primarily focus on?', options: ['Reducing costs in all departments', 'Systematic attention to energy to improve performance', 'Increasing the number of employees', 'Expanding product lines'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 502, section: 'ISO 50001', text: 'What is the main objective of energy management?', options: ['Increased energy costs', 'Enhanced operational efficiency and reduced environmental impact', 'Decreased employee productivity', 'Higher turnover rates'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 503, section: 'ISO 50001', text: 'What is the main objective of energy management? (Duplicate context in text)', options: ['To increase energy consumption', 'To continually improve the energy performance of the organization', 'To reduce the workforce', 'To enhance marketing strategies'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 504, section: 'ISO 50001', text: 'What does energy efficiency refer to?', options: ['The total amount of energy consumed', 'The relationship between output of performance and energy input', 'The cost of energy per unit', 'Number of employees in energy management'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 505, section: 'ISO 50001', text: 'Which of the following best describes the goal of maintaining energy performance improvements?', options: ['To ensure that energy costs are minimized', 'To sustain the energy efficiency gains achieved over time', 'To increase number of suppliers', 'To reduce organization size'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 506, section: 'ISO 50001', text: 'In the context of energy management, what is meant by "systematic attention"?', options: ['Randomly checking energy usage', 'A structured approach to monitoring and improving energy use', 'Ignoring energy consumption', 'Focusing solely on financial performance'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 507, section: 'ISO 50001', text: 'What is a potential benefit of improving energy performance in an organization?', options: ['Increased energy costs', 'Enhanced operational efficiency and reduced environmental impact', 'Decreased productivity', 'Higher turnover'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 508, section: 'ISO 50001', text: 'What is the first key component in the energy management process?', options: ['Analysis', 'Data Collection', 'Goal Setting', 'Implementation'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 509, section: 'ISO 50001', text: 'Which component involves evaluating the data collected to understand energy usage?', options: ['Monitoring and Reporting', 'Implementation', 'Analysis', 'Goal Setting'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 510, section: 'ISO 50001', text: 'What is the purpose of the Goal Setting component in energy management?', options: ['To collect data', 'To define specific energy efficiency objectives to be achieved', 'To monitor energy consumption', 'To implement energy-saving measures'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 511, section: 'ISO 50001', text: 'Conducting an energy review is the first step in the energy management process.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 512, section: 'ISO 50001', text: 'Identifying Significant Energy Uses (SEUs) is not necessary for establishing energy baselines.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 513, section: 'ISO 50001', text: 'Establishing energy performance indicators (EnPIs) is part of the process of improving energy performance.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 514, section: 'ISO 50001', text: 'Creating a list of opportunities and action plans is an essential step in the energy management process.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 515, section: 'ISO 50001', text: 'Setting objectives and energy targets is unnecessary for delivering results that improve energy performance.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 516, section: 'ISO 50001', text: 'Preparing a data collection plan is a crucial step in monitoring energy performance.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 517, section: 'ISO 50001', text: 'An Energy Performance Indicator (EnPI) is a measure or unit of energy performance defined by the organization.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 518, section: 'ISO 50001', text: 'The EnPI value is a quantification of the EnPI at a specific point in time or over a specified period.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 519, section: 'ISO 50001', text: 'A static factor is a variable that routinely changes and does not significantly impact energy performance.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 520, section: 'ISO 50001', text: 'A relevant variable is a quantifiable factor that significantly impacts energy performance and routinely changes.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+
+            // LCA (English)
+            { id: 601, section: 'LCA', text: 'A Life cycle assessment should be done as a comparison of the -------------- in different stages in the life cycle.', options: ['Impact on the environment', 'Effect of pollution', 'Value judgment', 'None of above'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 602, section: 'LCA', text: 'We can ------------- the use of water, resources, energy sources and raw material for an LCA.', options: ['Life cycle assessment', 'Evaluate of product', 'Calculate / Account for', 'Ignore'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 603, section: 'LCA', text: 'The EPD is independently -------------- that communicates transparent environment life cycle impact of products in credible manner.', options: ['First party', 'Second party', 'Third party', 'Fourth party'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 604, section: 'LCA', text: 'Companies shall avoid allocation wherever possible by using ---------------', options: ['Process subdivision', 'Redefining the functional unit', 'Using system expansion', 'All of the above'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 605, section: 'LCA', text: 'The abiotic depletion potential (ADP) for minerals and metals non fossil resources used as reference ------------------------', options: ['1 kg of antimony', '1 kg of soft coal', '1 kg of hard coal', 'None'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 606, section: 'LCA', text: 'The second step of interpretation phase is evaluation that considers ------ Completeness analysis.', options: ['Consistency analysis', 'Sensitivity analysis', 'All of the above', 'None'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 607, section: 'LCA', text: 'The International Standard ISO 14040 covers three types of studies.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 608, section: 'LCA', text: 'The marketing and informing decision making are most important benefits of conducting LCA.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 609, section: 'LCA', text: 'The PCR provides the instructions for how the life-cycle assessment (LCA) should be conducted. It sets out what you need in define functional units only.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 610, section: 'LCA', text: 'The comparison between two different products with same function is accepted.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 611, section: 'LCA', text: 'The goal is the first component of LCA and didn’t need explain the reason of study.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 612, section: 'LCA', text: 'The primary data always site specific data.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 613, section: 'LCA', text: 'In LCI must relating the data to unit process and functional unit after validation of data.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+
+            // ISO 14067 (English)
+            { id: 701, section: 'ISO 14067', text: 'What is the primary driver of climate change according to scientific consensus?', options: ['Natural climate cycles', 'Human activities, particularly fossil fuel combustion', 'Solar radiation changes', 'Volcanic eruptions'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 702, section: 'ISO 14067', text: 'Which of the following is NOT a major greenhouse gas (GHG)?', options: ['Carbon Dioxide (CO2)', 'Methane (CH4)', 'Nitrous Oxide (N2O)', 'Oxygen (O2)'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 703, section: 'ISO 14067', text: 'What is the greenhouse effect?', options: ['A process that cools the Earth', 'A natural process that warms the Earth’s surface by trapping heat', 'A phenomenon that only occurs in urban areas', 'A method of reducing carbon emissions'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 704, section: 'ISO 14067', text: 'Which international agreement aims to reduce greenhouse gas emissions globally?', options: ['Kyoto Protocol', 'Paris Agreement', 'Montreal Protocol', 'Rio Declaration'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 705, section: 'ISO 14067', text: 'What does the term "carbon footprint" refer to?', options: ['Amount of carbon in atmosphere', 'The total GHG emissions associated with an activity, product, or individual', 'Physical footprint', 'Land used for offsetting'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 706, section: 'ISO 14067', text: 'Which of the following is a component of the Greenhouse Gas Protocol?', options: ['Corporate Standard', 'EIA', 'LCA', 'Carbon Neutrality Framework'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 707, section: 'ISO 14067', text: 'What is the purpose of ISO 14067?', options: ['To provide guidelines for carbon neutrality', 'To focus on the carbon footprint of products', 'To assess financial risks', 'To measure water usage'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 708, section: 'ISO 14067', text: 'Which scope of emissions includes direct GHG emissions from owned or controlled sources?', options: ['Scope 1', 'Scope 2', 'Scope 3', 'Scope 4'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 709, section: 'ISO 14067', text: 'What is the main goal of the Partnership for Carbon Accounting Financials (PCAF)?', options: ['Promote renewable energy', 'Standardize carbon accounting for the financial sector', 'Reduce manufacturing emissions', 'Enhance public awareness'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 710, section: 'ISO 14067', text: 'Which of the following is a significant impact of climate change?', options: ['Decreased biodiversity', 'Increased agricultural productivity', 'Stabilized weather', 'Reduced sea levels'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 711, section: 'ISO 14067', text: 'Human activities, particularly fossil fuel combustion are the primary driver of climate change.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 712, section: 'ISO 14067', text: 'Nitrous Oxide (N2O) is NOT a major greenhouse gas (GHG)?', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 713, section: 'ISO 14067', text: 'Scope 1 is the scope of emissions includes direct GHG emissions from owned or controlled sources.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 714, section: 'ISO 14067', text: 'For carbon footprint of product, system boundaries should include scope 1, 2 and 3.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 715, section: 'ISO 14067', text: 'Life Cycle Assessment (LCA) evaluate the Environmental impacts of a product throughout its entire life cycle.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 716, section: 'ISO 14067', text: 'Product CFP focuses specifically on GHG emissions but LCA focuses on all environmental impact categories.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 717, section: 'ISO 14067', text: 'The main goal of quantifying the carbon footprint (CFP) is to calculate the potential contribution of a product to global warming.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 718, section: 'ISO 14067', text: 'The avoidance of double-counting ensures that the same environmental impacts are not counted multiple times.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 719, section: 'ISO 14067', text: 'The first step in the methodology for quantifying the product CFP is impact assessment.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 720, section: 'ISO 14067', text: 'The main goal of quantifying the carbon footprint is to calculate contribution to global warming (Duplicate).', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+
+            // GHG Protocol (English)
+            { id: 801, section: 'GHG Protocol', text: 'Global warming is caused by:', options: ['Methane', 'Nitrogen dioxide', 'Greenhouse gases', 'Hydrogen'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 802, section: 'GHG Protocol', text: 'Green House Effect is due to:', options: ['Ozone layer', 'Infrared layer', 'Moisture layer', 'CO2 layer in the atmosphere'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 803, section: 'GHG Protocol', text: 'Which of the following is not a Greenhouse gas?', options: ['CO2', 'Ozone', 'N2O', 'SO2'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 804, section: 'GHG Protocol', text: 'The greenhouse effect which is causing an increase in the atmospheric temperature is mainly due to:', options: ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Argon'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 805, section: 'GHG Protocol', text: 'The GHG Protocol define and categorize emissions into the following:', options: ['Direct Emissions', 'Indirect Emissions', 'Direct and Indirect Emissions', 'None of the above'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 806, section: 'GHG Protocol', text: 'GHG emissions typically occur from the following source categories:', options: ['Stationary combustion and Fugitive emissions', 'Mobile combustion, Process emissions', 'Stationary, Mobile, Process and Fugitive', 'Stationary only'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 807, section: 'GHG Protocol', text: 'The emission factor is:', options: ['The factor that converts activity data into GHG emissions data', 'The value of the collected data', 'Molecular weight', 'Equivalent weight'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 808, section: 'GHG Protocol', text: 'The principles of GHG accounting are:', options: ['Transparency and Accountability', 'Completeness and Consistency', 'Accuracy, Completeness and Consistency', 'Relevance, Completeness, Consistency, Transparency and Accuracy'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 809, section: 'GHG Protocol', text: 'The aim of the managing inventory quality is:', options: ['Increase profit', 'Enhancing reputation', 'Effective reporting of emissions', 'Increasing competitive advantage'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 810, section: 'GHG Protocol', text: 'The main step that necessary for calculating and reporting the organization’s carbon foot print:', options: ['Collecting and managing data', 'The Correct selection of the emission factors', 'Using the environmental management system standards', 'The customers feed back'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 811, section: 'GHG Protocol', text: 'The forestation, reforestation and forest planting considered as a natural carbon sinks.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 812, section: 'GHG Protocol', text: 'GHG protocol can be applied by industrial companies only.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 813, section: 'GHG Protocol', text: 'GHG Protocol defines 5 categories of scope 3 emissions.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 814, section: 'GHG Protocol', text: 'Scope 3 emissions accounting is mandatory according to GHG Protocol.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 815, section: 'GHG Protocol', text: 'Oxygen, Nitrogen, and Argon are not examples of greenhouse gases according to GHG protocol.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 816, section: 'GHG Protocol', text: 'The determination of the organizational and operational boundaries is one of the most important steps.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+
+            // IPCC (English)
+            { id: 901, section: 'IPCC', text: 'What is the primary emission source category for fugitive emissions in the petroleum and natural gas sector?', options: ['Combustion from flaring', 'Fugitive emissions from equipment leaks', 'Chemical transformations', 'Biomass'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 902, section: 'IPCC', text: 'Why does IPCC recommend tiered approaches for emission estimation?', options: ['Match reporting deadline', 'Balance accuracy with available data/resources', 'Simplify complex data', 'Avoid country-specific data'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 903, section: 'IPCC', text: 'Which is NOT considered Scope 1 emission under IPCC for a refinery?', options: ['Combustion for process heat', 'Fugitive emissions from pipelines', 'CO2 from purchased electricity', 'Venting'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 904, section: 'IPCC', text: 'When estimating methane emissions from natural gas operations, what parameter does the IPCC consider critical in Tier 2?', options: ['GWP of methane', 'Country-specific leakage rates', 'Carbon content', 'Average equipment age'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 905, section: 'IPCC', text: 'What is the default IPCC assumption about the oxidation factor for natural gas combustion?', options: ['95%', '98%', '99%', '100%'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 906, section: 'IPCC', text: 'Which of the following activities is a significant contributor to N2O emissions in the energy sector?', options: ['Gas flaring', 'Coal mining', 'Gasoline combustion in vehicles', 'Natural gas transmission'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 907, section: 'IPCC', text: 'In IPCC reporting, how is the carbon content of crude oil typically determined?', options: ['Laboratory testing of each crude batch', 'Using IPCC default emission factors', 'Manufacturer’s specifications', 'Estimation based on sulfur'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 908, section: 'IPCC', text: 'Why are CO2 emissions from combustion of refinery off-gases usually categorized separately?', options: ['They are non-combustion', 'They are biogenic', 'They are a by-product of on-site processes', 'Do not contribute to GHG'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 909, section: 'IPCC', text: 'Why does the IPCC emphasize accounting for flaring efficiency?', options: ['Eliminates methane', 'Inefficient flaring increases CO2', 'Inefficient flaring releases uncombusted methane', 'Promote energy recovery'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 910, section: 'IPCC', text: 'Which factor is critical for estimating GHG emissions from underground coal mining?', options: ['Depth of mining', 'Methane content of the coal seam', 'Heat content', 'Volume of extracted coal'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 911, section: 'IPCC', text: 'The IPCC directly conducts research and collects climate data from monitoring stations worldwide.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 912, section: 'IPCC', text: 'The IPCC is responsible for providing scientific reports on climate change to policymakers.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 913, section: 'IPCC', text: 'IPCC assessment reports are released annually.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 914, section: 'IPCC', text: 'The IPCC develops methodologies for calculating greenhouse gas (GHG) emissions.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 915, section: 'IPCC', text: 'The IPCC operates under the United Nations.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 916, section: 'IPCC', text: 'The IPCC provides policy recommendations for countries to adopt.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 917, section: 'IPCC', text: 'The IPCC’s Working Group I focuses on the physical science basis of climate change.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 918, section: 'IPCC', text: 'The IPCC’s methodologies are mandatory for all countries to use.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 919, section: 'IPCC', text: 'The IPCC provides global temperature projections based on different emissions scenarios.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 920, section: 'IPCC', text: 'The IPCC reports are authored only by scientists from developed countries.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+
+            // CBAM (English)
+            { id: 1001, section: 'CBAM', text: 'CO2 emission calculations under CBAM account for steam inputs as part of:', options: ['Scope 1', 'Scope 2', 'Not accounted for', 'Scope 3'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 1002, section: 'CBAM', text: 'A cement company is reporting cement embedded CO2 emissions under CBAM, which of the following is taken into consideration?', options: ['Clinker', 'Limestone', 'None of the above', 'Both'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 1003, section: 'CBAM', text: 'A company has a carbon footprint of 1000 tCO2 per year. Product 1 is 60% of production. If P1 amounts to 50 t/y, what are embedded emissions?', options: ['600', '12', '6', '120'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 1004, section: 'CBAM', text: 'The calculation of CO2 emissions from the flare of a petroleum refining company requires:', options: ['Volumetric flowrate', 'Composition of gases', 'Both', 'None'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 1005, section: 'CBAM', text: 'If exported goods have embedded emissions higher than the free allowance:', options: ['Penalties are imposed', 'CBAM certificates are bought from EU carbon market', 'Certificates bought from Egyptian market', 'No action'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 1006, section: 'CBAM', text: 'Methane pyrolysis has a lower C footprint than Steam Methane Reforming.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1007, section: 'CBAM', text: 'Catalytic methane pyrolysis does not generate CO2.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1008, section: 'CBAM', text: 'Green hydrogen is produced from water hydrolysis using grid electricity.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1009, section: 'CBAM', text: 'In a refinery, combustion emissions are due to fuel required for the main furnace only.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1010, section: 'CBAM', text: 'Fugitive emissions from storage tanks depend on the type of tank used and the material used.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1011, section: 'CBAM', text: 'Waste heat recovery for electricity production does not result in savings in CO2 emissions.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1012, section: 'CBAM', text: 'According to CBAM regulations penalties will be imposed if goods are imported by non-authorized CBAM declarant.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+
+            // ISO 14064-3 (English)
+            { id: 1101, section: 'ISO 14064-3', text: 'What is the primary objective of ISO 14064-3?', options: ['Quantification of emissions', 'Establish requirements for verification and validation', 'Certification of inventories', 'Develop reduction projects'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 1102, section: 'ISO 14064-3', text: 'In ISO 14064-3, what does the term "materiality" refer to?', options: ['Threshold for significance of errors', 'Physical form of data', 'Type of inventory', 'Scope of assertion'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 1103, section: 'ISO 14064-3', text: 'Which of the following is NOT a responsibility of the verifier under ISO 14064-3?', options: ['Reviewing assertion', 'Providing independent opinion', 'Assessing risk', 'Assisting in preparing the GHG inventory'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 1104, section: 'ISO 14064-3', text: 'What is a key factor in determining the level of assurance?', options: ['Size of team', 'Intended use of the GHG assertion', 'Duration', 'Protocol used'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 1105, section: 'ISO 14064-3', text: 'Which of the following is a key requirement for validation?', options: ['Ensuring no discrepancies', 'Conducting a site visit', 'Confirming the plausibility of assumptions and data', 'Creating inventory'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 1106, section: 'ISO 14064-3', text: 'Which type of evidence is considered most reliable for verification purposes?', options: ['Data verified by external third parties', 'Verbal statements', 'Internal estimates', 'Assumptions'], correctAnswerIndex: 0, type: 'MCQ', language: 'en' },
+            { id: 1107, section: 'ISO 14064-3', text: 'What is the purpose of a verification plan?', options: ['Outline reduction strategy', 'Detail verifier’s approach to evaluating the GHG assertion', 'Certify inventory', 'Calculate factors'], correctAnswerIndex: 1, type: 'MCQ', language: 'en' },
+            { id: 1108, section: 'ISO 14064-3', text: 'What is a common tool used for assessing the likelihood of material discrepancies?', options: ['Sensitivity analysis', 'Database', 'Calculator', 'Risk-based sampling'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 1109, section: 'ISO 14064-3', text: 'What must a verifier provide at the conclusion of a verification process?', options: ['Inventory report', 'Action plan', 'Validation opinion', 'Verification/Assurance statement'], correctAnswerIndex: 3, type: 'MCQ', language: 'en' },
+            { id: 1110, section: 'ISO 14064-3', text: 'Why is independence important for a verifier?', options: ['Compliance', 'Streamline process', 'Avoid conflicts of interest and ensure impartiality', 'Minimize evidence'], correctAnswerIndex: 2, type: 'MCQ', language: 'en' },
+            { id: 1111, section: 'ISO 14064-3', text: 'The verifier must be part of the team preparing GHG data to ensure accuracy.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1112, section: 'ISO 14064-3', text: 'ISO 14064-3 focuses on ensuring the credibility of GHG data through verification and validation processes.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1113, section: 'ISO 14064-3', text: 'The verifier can provide consulting services on emissions reductions during the verification process.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1114, section: 'ISO 14064-3', text: 'The verification process includes reviewing assumptions and methodologies used in preparing GHG data.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1115, section: 'ISO 14064-3', text: 'ISO 14064-3 can only be applied to large industrial organizations.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1116, section: 'ISO 14064-3', text: 'The verifier must document any material discrepancies identified during the verification process.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1117, section: 'ISO 14064-3', text: 'The verifier must review GHG data for all previous years of the company.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1118, section: 'ISO 14064-3', text: 'The primary output of the verification process is a report that confirms the validity of the GHG declarations.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+            { id: 1119, section: 'ISO 14064-3', text: 'The verifier can modify GHG data during the verification process.', options: ['True', 'False'], correctAnswerIndex: 1, type: 'TF', language: 'en' },
+            { id: 1120, section: 'ISO 14064-3', text: 'Validation includes reviewing data related to emission sources and GHG sinks.', options: ['True', 'False'], correctAnswerIndex: 0, type: 'TF', language: 'en' },
+        ];
+
+        // ==========================================
+        // 2. HELPER FUNCTIONS
+        // ==========================================
+        const shuffleArray = (array) => {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        };
+
+        const formatTime = (seconds) => {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        };
+
+        // ==========================================
+        // 3. UI COMPONENTS
+        // ==========================================
+
+        const Card = ({ children, className = "" }) => (
+            <div className={`glass-card rounded-3xl p-8 ${className}`}>
+                {children}
+            </div>
+        );
+
+        const Button = ({ onClick, children, variant = 'primary', className = "", disabled = false }) => {
+            const baseClass = "px-6 py-4 rounded-xl font-bold transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg";
+            const variants = {
+                primary: "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white hover:shadow-blue-500/30",
+                secondary: "bg-white/80 text-slate-700 hover:bg-white border border-slate-200 backdrop-blur-sm",
+                success: "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30",
+                danger: "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-rose-500/30",
+                ghost: "bg-transparent text-slate-500 hover:text-blue-600 hover:bg-blue-50/50 shadow-none"
+            };
+
+            return (
+                <button 
+                    onClick={onClick} 
+                    disabled={disabled}
+                    className={`${baseClass} ${variants[variant]} ${className}`}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        const MainMenu = ({ onStart, totalQuestions }) => {
+            const [count, setCount] = useState('ALL');
+            const [timer, setTimer] = useState(true);
+
+            return (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="max-w-xl mx-auto pt-16 md:pt-24 px-4"
+                >
+                    <div className="text-center mb-12">
+                        <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                            className="w-24 h-24 bg-gradient-to-tr from-blue-500 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-blue-500/40 mb-8"
+                        >
+                            <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </motion.div>
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight leading-tight">
+                            Professional Exam <br/> <span className="text-blue-600">Certification</span>
+                        </h1>
+                        <p className="text-slate-500 text-lg md:text-xl font-medium">Climate Change • ISO Standards • LCA • IPCC</p>
+                    </div>
+
+                    <Card>
+                        <div className="space-y-8">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-600 mb-4 uppercase tracking-wider">Select Question Count</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {[
+                                        { l: 'Full Exam', v: 'ALL', s: `${totalQuestions} Questions` },
+                                        { l: 'Standard', v: 80, s: '80 Questions' },
+                                        { l: 'Short', v: 40, s: '40 Questions' },
+                                        { l: 'Quick', v: 20, s: '20 Questions' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.v}
+                                            onClick={() => setCount(opt.v)}
+                                            className={`p-4 rounded-2xl text-left border-2 transition-all duration-200 relative overflow-hidden ${
+                                                count === opt.v 
+                                                ? 'border-blue-500 bg-blue-50/50 shadow-md transform scale-[1.02]' 
+                                                : 'border-transparent bg-slate-50 hover:bg-white hover:shadow-sm'
+                                            }`}
+                                        >
+                                            <div className={`font-bold text-lg ${count === opt.v ? 'text-blue-700' : 'text-slate-700'}`}>{opt.l}</div>
+                                            <div className="text-xs text-slate-400 mt-1 font-medium">{opt.s}</div>
+                                            {count === opt.v && (
+                                                <div className="absolute top-3 right-3 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div 
+                                onClick={() => setTimer(!timer)}
+                                className="flex items-center space-x-4 p-4 rounded-2xl border border-transparent bg-slate-50 cursor-pointer hover:bg-white transition-all shadow-sm group"
+                            >
+                                <div className={`w-12 h-8 rounded-full flex items-center p-1 duration-300 ${timer ? 'bg-green-500' : 'bg-slate-300'}`}>
+                                    <div className={`bg-white w-6 h-6 rounded-full shadow-md transform duration-300 ${timer ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                                </div>
+                                <div className="flex-grow">
+                                    <div className="font-bold text-slate-700 group-hover:text-blue-700 transition-colors">Enable Timer</div>
+                                    <div className="text-xs text-slate-400 font-medium">Approx. 90 seconds per question</div>
+                                </div>
+                            </div>
+
+                            <Button onClick={() => onStart(count, timer ? (count === 'ALL' ? QUESTIONS.length : count) * 90 : 0)} className="w-full text-lg shadow-blue-500/25">
+                                Start Examination
+                            </Button>
+                        </div>
+                    </Card>
+                </motion.div>
+            );
+        };
+
+        const QuestionView = ({ question, index, total, onAnswer, answer, onNext, onPrev, timer, timeLeft, onFinish }) => {
+            const isRTL = question.language === 'ar';
+            const isAnswered = answer !== undefined;
+
+            return (
+                <div className="max-w-4xl mx-auto h-full flex flex-col pt-6 pb-8 px-4">
+                    {/* Top Bar */}
+                    <div className="flex items-center justify-between mb-8 bg-white/60 backdrop-blur-xl rounded-2xl p-4 shadow-sm border border-white/50 sticky top-4 z-50">
+                        <div className="flex items-center gap-4 w-full">
+                            <button onClick={onFinish} className="p-2 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors" title="Quit Exam">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                            
+                            <div className="flex-grow flex flex-col justify-center mx-2">
+                                <div className="flex justify-between text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">
+                                    <span>Progress</span>
+                                    <span>{Math.round(((index + 1) / total) * 100)}%</span>
+                                </div>
+                                <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                                    <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${((index + 1) / total) * 100}%` }}
+                                        transition={{ duration: 0.5 }}
+                                        className="h-full bg-blue-500 rounded-full" 
+                                    />
+                                </div>
+                            </div>
+
+                            {timer && (
+                                <div className={`font-mono font-bold text-lg px-4 py-2 rounded-xl shadow-sm border ${timeLeft < 60 ? 'bg-red-50 text-red-600 border-red-100 animate-pulse' : 'bg-white text-blue-600 border-slate-100'}`}>
+                                    {formatTime(timeLeft)}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={question.id}
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -50 }}
+                            transition={{ duration: 0.3, ease: "circOut" }}
+                            className="flex-grow flex flex-col"
+                        >
+                            <Card className="flex-grow flex flex-col mb-8 relative overflow-hidden">
+                                {/* Decorative blob */}
+                                <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+                                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+
+                                <span className="relative text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit mb-6 border border-blue-100 uppercase tracking-widest shadow-sm">
+                                    {question.section}
+                                </span>
+                                
+                                <h2 className={`relative text-2xl md:text-3xl font-bold text-slate-800 mb-10 leading-snug ${isRTL ? 'text-right font-arabic' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {question.text}
+                                </h2>
+
+                                <div className="relative space-y-4 flex-grow" dir={isRTL ? 'rtl' : 'ltr'}>
+                                    {question.options.map((opt, i) => {
+                                        const isSelected = answer === i;
+                                        const isCorrect = question.correctAnswerIndex === i;
+                                        
+                                        let stateClass = "border-slate-200/60 bg-white/50 hover:border-blue-400 hover:bg-blue-50/30 hover:shadow-md";
+                                        let icon = null;
+
+                                        if (isAnswered) {
+                                            if (isCorrect) {
+                                                stateClass = "border-green-500 bg-green-50/80 ring-1 ring-green-500/20 shadow-md";
+                                                icon = <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+                                            } else if (isSelected) {
+                                                stateClass = "border-red-500 bg-red-50/80 ring-1 ring-red-500/20 shadow-md";
+                                                icon = <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
+                                            } else {
+                                                stateClass = "border-slate-100 bg-slate-50/30 opacity-60";
+                                            }
+                                        } else if (isSelected) {
+                                            stateClass = "border-blue-600 bg-blue-50 ring-1 ring-blue-500 shadow-md";
+                                        }
+
+                                        return (
+                                            <button
+                                                key={i}
+                                                onClick={() => !isAnswered && onAnswer(i)}
+                                                disabled={isAnswered}
+                                                className={`w-full p-5 rounded-2xl border-2 text-lg transition-all duration-200 flex items-center group ${stateClass}`}
+                                            >
+                                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${isRTL ? 'ml-5' : 'mr-5'} ${
+                                                    isAnswered 
+                                                        ? (isCorrect ? 'border-green-500 bg-green-100' : (isSelected ? 'border-red-500 bg-red-100' : 'border-slate-300'))
+                                                        : (isSelected ? 'border-blue-600' : 'border-slate-300 group-hover:border-blue-400')
+                                                }`}>
+                                                    {icon || <div className={`w-3 h-3 rounded-full transition-transform ${isSelected && !isAnswered ? 'bg-blue-600 scale-100' : 'scale-0'}`}></div>}
+                                                </div>
+                                                <span className={`font-medium ${isRTL ? 'text-right font-arabic' : 'text-left'}`}>{opt}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {isAnswered && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className={`mt-8 p-5 rounded-2xl border ${answer === question.correctAnswerIndex ? 'bg-green-50/80 border-green-200 text-green-800' : 'bg-red-50/80 border-red-200 text-red-800'}`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className={`font-bold ${isRTL ? 'ml-auto' : 'mr-auto'}`}>
+                                                {answer === question.correctAnswerIndex ? 'Correct Answer!' : 'Incorrect'}
+                                            </div>
+                                            {!isRTL && answer !== question.correctAnswerIndex && <div className="text-sm">Correct: <strong>{question.options[question.correctAnswerIndex]}</strong></div>}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </Card>
+                        </motion.div>
+                    </AnimatePresence>
+
+                    {/* Nav Bar */}
+                    <div className="flex gap-4 sticky bottom-4 z-40">
+                        <Button variant="secondary" onClick={onPrev} disabled={index === 0} className="flex-1 shadow-xl">Previous</Button>
+                        <Button 
+                            onClick={index === total - 1 ? onFinish : onNext} 
+                            variant={index === total - 1 ? 'success' : 'primary'} 
+                            className="flex-[2] shadow-xl"
+                        >
+                            {index === total - 1 ? 'Finish Exam' : 'Next Question'}
+                        </Button>
+                    </div>
+                </div>
+            );
+        };
+
+        const Results = ({ questions, answers, onRestart }) => {
+            const [filter, setFilter] = useState('WRONG');
+            
+            const score = questions.reduce((acc, q) => acc + (answers[q.id] === q.correctAnswerIndex ? 1 : 0), 0);
+            const percentage = Math.round((score / questions.length) * 100);
+            const passed = percentage >= 70;
+            
+            const wrongQuestions = questions.filter(q => answers[q.id] !== q.correctAnswerIndex);
+            const displayQuestions = filter === 'WRONG' ? wrongQuestions : questions;
+
+            useEffect(() => {
+                if (percentage >= 70) {
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                }
+            }, []);
+
+            return (
+                <div className="max-w-4xl mx-auto py-12 px-4">
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                        <Card className="text-center mb-8 relative overflow-hidden bg-white/90">
+                            <div className={`absolute top-0 left-0 w-full h-2 ${passed ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                            <h2 className="text-3xl font-black text-slate-800 mb-2 mt-4">{passed ? 'Congratulations!' : 'Keep Practicing'}</h2>
+                            <p className="text-slate-500 mb-10">{passed ? 'You have passed the exam.' : 'You did not meet the passing score.'}</p>
+
+                            <div className="flex justify-center mb-10">
+                                <div className="relative w-56 h-56">
+                                    <svg className="w-full h-full transform -rotate-90 filter drop-shadow-lg">
+                                        <circle cx="112" cy="112" r="100" stroke="currentColor" strokeWidth="16" fill="none" className="text-slate-100" />
+                                        <circle 
+                                            cx="112" cy="112" r="100" 
+                                            stroke="currentColor" strokeWidth="16" fill="none" 
+                                            strokeDasharray={2 * Math.PI * 100}
+                                            strokeDashoffset={2 * Math.PI * 100 * (1 - percentage / 100)}
+                                            className={`${passed ? 'text-green-500' : 'text-red-500'} transition-all duration-1000 ease-out`}
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span className="text-6xl font-black text-slate-800 tracking-tighter">{percentage}%</span>
+                                        <span className="text-sm font-bold text-slate-400 uppercase mt-1 tracking-widest">Score</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-10">
+                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                    <div className="text-2xl font-bold text-slate-800">{questions.length}</div>
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Questions</div>
+                                </div>
+                                <div className="p-4 bg-green-50 rounded-2xl border border-green-100">
+                                    <div className="text-2xl font-bold text-green-600">{score}</div>
+                                    <div className="text-[10px] font-bold text-green-600 uppercase tracking-wider">Correct</div>
+                                </div>
+                                <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
+                                    <div className="text-2xl font-bold text-red-600">{questions.length - score}</div>
+                                    <div className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Wrong</div>
+                                </div>
+                            </div>
+
+                            <Button onClick={onRestart} className="px-12 py-4 text-lg shadow-blue-500/30">Start New Exam</Button>
+                        </Card>
+                    </motion.div>
+
+                    <div className="glass-card rounded-3xl overflow-hidden shadow-xl">
+                        <div className="bg-slate-50/80 p-5 border-b border-slate-200 flex justify-between items-center backdrop-blur-sm">
+                            <h3 className="font-bold text-slate-700 text-lg">Detailed Review</h3>
+                            <div className="flex gap-2 p-1 bg-slate-200/50 rounded-xl">
+                                {['WRONG', 'ALL'].map(t => (
+                                    <button
+                                        key={t}
+                                        onClick={() => setFilter(t)}
+                                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === t ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        {t === 'WRONG' ? 'Incorrect' : 'All'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="divide-y divide-slate-100 bg-white/60">
+                            {displayQuestions.length === 0 ? (
+                                <div className="p-16 text-center text-slate-400">
+                                    {filter === 'WRONG' ? 'Excellent work! No mistakes found.' : 'No questions available.'}
+                                </div>
+                            ) : (
+                                displayQuestions.map(q => {
+                                    const isCorrect = answers[q.id] === q.correctAnswerIndex;
+                                    const isRTL = q.language === 'ar';
+                                    return (
+                                        <div key={q.id} className="p-8 hover:bg-white/80 transition-colors">
+                                            <div className="flex gap-6">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold shadow-sm ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                    {isCorrect ? '✓' : '✕'}
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{q.section}</span>
+                                                    </div>
+                                                    <p className={`font-bold text-lg text-slate-800 mb-4 leading-relaxed ${isRTL ? 'text-right font-arabic' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>{q.text}</p>
+                                                    <div className="space-y-3 text-sm">
+                                                        {!isCorrect && answers[q.id] !== undefined && (
+                                                            <div className={`flex items-center gap-3 text-red-700 bg-red-50 p-3 rounded-lg border border-red-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                                                <span className="uppercase text-[10px] font-bold px-2 py-1 bg-white rounded border border-red-100 shadow-sm">Your Answer</span>
+                                                                <span className={`font-medium ${isRTL ? 'font-arabic' : ''}`}>{q.options[answers[q.id]]}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className={`flex items-center gap-3 text-green-700 bg-green-50 p-3 rounded-lg border border-green-100 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                                            <span className="uppercase text-[10px] font-bold px-2 py-1 bg-white rounded border border-green-100 shadow-sm">Correct</span>
+                                                            <span className={`font-medium ${isRTL ? 'font-arabic' : ''}`}>{q.options[q.correctAnswerIndex]}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [state, setState] = useState('MENU');
+            const [activeQuestions, setActiveQuestions] = useState([]);
+            const [index, setIndex] = useState(0);
+            const [answers, setAnswers] = useState({});
+            const [timeLeft, setTimeLeft] = useState(0);
+            const [isTimerActive, setTimerActive] = useState(false);
+
+            useEffect(() => {
+                let interval;
+                if (state === 'PLAYING' && isTimerActive && timeLeft > 0) {
+                    interval = setInterval(() => {
+                        setTimeLeft(prev => {
+                            if (prev <= 1) {
+                                setState('RESULTS');
+                                return 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+                }
+                return () => clearInterval(interval);
+            }, [state, isTimerActive, timeLeft]);
+
+            const startExam = (count, duration) => {
+                let selection = [...QUESTIONS];
+                if (count !== 'ALL') {
+                    selection = shuffleArray(selection).slice(0, Math.min(count, selection.length));
+                } else {
+                    selection = shuffleArray(selection);
+                }
+                
+                setActiveQuestions(selection);
+                setIndex(0);
+                setAnswers({});
+                
+                if (duration > 0) {
+                    setTimeLeft(duration);
+                    setTimerActive(true);
+                } else {
+                    setTimerActive(false);
+                }
+                setState('PLAYING');
+            };
+
+            const handleAnswer = (optIndex) => {
+                setAnswers(prev => ({ ...prev, [activeQuestions[index].id]: optIndex }));
+            };
+            return (
+                <div className="min-h-screen">
+                    {state === 'MENU' && <MainMenu onStart={startExam} totalQuestions={QUESTIONS.length} />}
+                    {state === 'PLAYING' && (
+                        <QuestionView 
+                            question={activeQuestions[index]} 
+                            index={index} 
+                            total={activeQuestions.length}
+                            onAnswer={handleAnswer}
+                            answer={answers[activeQuestions[index].id]}
+                            onNext={() => setIndex(i => i + 1)}
+                            onPrev={() => setIndex(i => i - 1)}
+                            timer={isTimerActive}
+                            timeLeft={timeLeft}
+                            onFinish={() => setState('RESULTS')}
+                        />
+                    )}
+                    {state === 'RESULTS' && (
+                        <Results 
+                            questions={activeQuestions} 
+                            answers={answers} 
+                            onRestart={() => setState('MENU')} 
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
